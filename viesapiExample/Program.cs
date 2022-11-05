@@ -51,7 +51,7 @@ namespace VIESAPI
 				}
 				else
 				{
-					Console.WriteLine("Błąd: " + viesapi.LastError + " (kod: " + viesapi.LastErrorCode + ")");
+					Console.WriteLine("Error: " + viesapi.LastError + " (code: " + viesapi.LastErrorCode + ")");
 				}
 
 				// Get VIES data from VIES system
@@ -63,7 +63,7 @@ namespace VIESAPI
                 }
                 else
                 {
-					Console.WriteLine("Błąd: " + viesapi.LastError + " (kod: " + viesapi.LastErrorCode + ")");
+					Console.WriteLine("Error: " + viesapi.LastError + " (code: " + viesapi.LastErrorCode + ")");
 				}
 			}
 			catch (Exception e)

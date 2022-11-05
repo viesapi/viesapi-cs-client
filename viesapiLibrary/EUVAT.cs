@@ -78,7 +78,6 @@ namespace VIESAPI
 			map.Add("ES", @"ES[A-Z0-9]{9}$");
 			map.Add("FI", @"FI\d{8}$");
 			map.Add("FR", @"FR[A-Z0-9]{2}\d{9}$");
-			map.Add("GB", @"GB[A-Z0-9]{5,12}$");
 			map.Add("HR", @"HR\d{11}$");
 			map.Add("HU", @"HU\d{8}$");
 			map.Add("IE", @"IE[A-Z0-9]{8,9}$");
@@ -94,6 +93,7 @@ namespace VIESAPI
 			map.Add("SE", @"SE\d{12}$");
 			map.Add("SI", @"SI\d{8}$");
 			map.Add("SK", @"SK\d{10}$");
+			map.Add("XI", @"XI[A-Z0-9]{5,12}$");
 		}
 
 		/// <summary>

@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net20;net452;net462;net472;netstandard2.0;netcoreapp3.1;net5.0</TargetFrameworks>
+		<TargetFrameworks>net20;net452;net462;net472;net48;netstandard2.0;netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
 		<RuntimeIdentifiers>win</RuntimeIdentifiers>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 		<PackageId>VIESAPI.VIESAPIClient</PackageId>
-		<Version>1.2.3</Version>
-		<AssemblyVersion>1.2.3.0</AssemblyVersion>
-		<FileVersion>1.2.3.0</FileVersion>
+		<Version>1.2.4</Version>
+		<AssemblyVersion>1.2.4.0</AssemblyVersion>
+		<FileVersion>1.2.4.0</FileVersion>
 
 		<Title>VIES API Service Client</Title>
 		<Summary>VIES API Service Client for .NET Framework (C#)</Summary>
@@ -58,6 +58,13 @@ in the fastest possible way.</Description>
 	</ItemGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net472' ">
+		<Reference Include="System" />
+		<Reference Include="System.Web" />
+		<Reference Include="System.Data" />
+		<Reference Include="System.Xml" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
 		<Reference Include="System" />
 		<Reference Include="System.Web" />
 		<Reference Include="System.Data" />
