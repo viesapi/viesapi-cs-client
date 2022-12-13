@@ -66,34 +66,34 @@ namespace VIESAPI
 
 		static EUVAT()
 		{
-			map.Add("AT", @"ATU\d{8}$");
-			map.Add("BE", @"BE0\d{9}$");
-			map.Add("BG", @"BG\d{9,10}$");
-			map.Add("CY", @"CY\d{8}[A-Z]{1}$");
-			map.Add("CZ", @"CZ\d{8,10}$");
-			map.Add("DE", @"DE\d{9}$");
-			map.Add("DK", @"DK\d{8}$");
-			map.Add("EE", @"EE\d{9}$");
-			map.Add("EL", @"EL\d{9}$");
-			map.Add("ES", @"ES[A-Z0-9]{9}$");
-			map.Add("FI", @"FI\d{8}$");
-			map.Add("FR", @"FR[A-Z0-9]{2}\d{9}$");
-			map.Add("HR", @"HR\d{11}$");
-			map.Add("HU", @"HU\d{8}$");
-			map.Add("IE", @"IE[A-Z0-9]{8,9}$");
-			map.Add("IT", @"IT\d{11}$");
-			map.Add("LT", @"LT\d{9,12}$");
-			map.Add("LU", @"LU\d{8}$");
-			map.Add("LV", @"LV\d{11}$");
-			map.Add("MT", @"MT\d{8}$");
-			map.Add("NL", @"NL\d{9}B\d{2}$");
-			map.Add("PL", @"PL\d{10}$");
-			map.Add("PT", @"PT\d{9}$");
-			map.Add("RO", @"RO\d{2,10}$");
-			map.Add("SE", @"SE\d{12}$");
-			map.Add("SI", @"SI\d{8}$");
-			map.Add("SK", @"SK\d{10}$");
-			map.Add("XI", @"XI[A-Z0-9]{5,12}$");
+			map.Add("AT", @"^ATU\d{8}$");
+			map.Add("BE", @"^BE[0-1]{1}\d{9}$");
+			map.Add("BG", @"^BG\d{9,10}$");
+			map.Add("CY", @"^CY\d{8}[A-Z]{1}$");
+			map.Add("CZ", @"^CZ\d{8,10}$");
+			map.Add("DE", @"^DE\d{9}$");
+			map.Add("DK", @"^DK\d{8}$");
+			map.Add("EE", @"^EE\d{9}$");
+			map.Add("EL", @"^EL\d{9}$");
+			map.Add("ES", @"^ES[A-Z0-9]{1}\d{7}[A-Z0-9]{1}$");
+			map.Add("FI", @"^FI\d{8}$");
+			map.Add("FR", @"^FR[A-Z0-9]{2}\d{9}$");
+			map.Add("HR", @"^HR\d{11}$");
+			map.Add("HU", @"^HU\d{8}$");
+			map.Add("IE", @"^IE[A-Z0-9+*]{8,9}$");
+			map.Add("IT", @"^IT\d{11}$");
+			map.Add("LT", @"^LT\d{9,12}$");
+			map.Add("LU", @"^LU\d{8}$");
+			map.Add("LV", @"^LV\d{11}$");
+			map.Add("MT", @"^MT\d{8}$");
+			map.Add("NL", @"^NL[A-Z0-9+*]{12}$");
+			map.Add("PL", @"^PL\d{10}$");
+			map.Add("PT", @"^PT\d{9}$");
+			map.Add("RO", @"^RO\d{2,10}$");
+			map.Add("SE", @"^SE\d{12}$");
+			map.Add("SI", @"^SI\d{8}$");
+			map.Add("SK", @"^SK\d{10}$");
+			map.Add("XI", @"^XI[A-Z0-9]{5,12}$");
 		}
 
 		/// <summary>
@@ -113,7 +113,7 @@ namespace VIESAPI
             number = number.Replace(" ", "");
 			number = number.Trim().ToUpper();
 
-			Regex re = new Regex(@"^[A-Z]{2}[A-Z0-9]{2,12}$");
+			Regex re = new Regex(@"^[A-Z]{2}[A-Z0-9+*]{2,12}$");
 
 			if (!re.IsMatch(number))
 			{
