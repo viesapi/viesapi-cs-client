@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright 2022 NETCAT (www.netcat.pl)
+ * Copyright 2022-2023 NETCAT (www.netcat.pl)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  * @author NETCAT <firma@netcat.pl>
- * @copyright 2022 NETCAT (www.netcat.pl)
+ * @copyright 2022-2023 NETCAT (www.netcat.pl)
  * @license http://www.apache.org/licenses/LICENSE-2.0
  */
 
@@ -115,7 +115,7 @@ namespace VIESAPI
 	[ComVisible(true)]
 	public class VIESAPIClient : IVIESAPIClient
 	{
-		public const string VERSION = "1.2.5";
+		public const string VERSION = "1.2.6";
 
 		public const string PRODUCTION_URL = "https://viesapi.eu/api";
 		public const string TEST_URL = "https://viesapi.eu/api-test";
@@ -244,19 +244,10 @@ namespace VIESAPI
 
 				if (doc == null)
 				{
-					Set(Error.CLI_CONNECT);
 					return null;
 				}
 
 				// parse response
-				string code = GetString(doc, "/result/error/code", null);
-
-				if (code != null)
-				{
-					Set(int.Parse(code), GetString(doc, "/result/error/description", null));
-					return null;
-				}
-
 				VIESData vies = new VIESData();
 
 				vies.UID = GetString(doc, "/result/vies/uid", null);
@@ -303,19 +294,10 @@ namespace VIESAPI
 
 				if (doc == null)
 				{
-					Set(Error.CLI_CONNECT);
 					return null;
 				}
 
 				// parse response
-				string code = GetString(doc, "/result/error/code", null);
-
-				if (code != null)
-				{
-					Set(int.Parse(code), GetString(doc, "/result/error/description", null));
-					return null;
-				}
-
 				AccountStatus status = new AccountStatus();
 
 				status.UID = GetString(doc, "/result/account/uid", null);
@@ -420,15 +402,23 @@ namespace VIESAPI
 				{
 					wc.Proxy = Proxy;
 
-					wc.Headers.Set("Authorization", GetAuthHeader("GET", url));
+                    wc.Headers.Set("Accept", "text/xml");
+                    wc.Headers.Set("Authorization", GetAuthHeader("GET", url));
 					wc.Headers.Set("User-Agent", GetAgentHeader());
 
 					byte[] b = wc.DownloadData(url);
 
-					doc = new XPathDocument(new MemoryStream(b));
-				}
-			}
-			catch (Exception e)
+					doc = Get(new MemoryStream(b));
+                }
+            }
+			catch (WebException we)
+			{
+                if (Get(we.Response.GetResponseStream()) != null)
+				{
+                    Set(Error.CLI_EXCEPTION, we.Message);
+                }
+            }
+            catch (Exception e)
 			{
 				Set(Error.CLI_EXCEPTION, e.Message);
 			}
@@ -437,10 +427,39 @@ namespace VIESAPI
 		}
 
 		/// <summary>
-		/// Create user agent header
+		/// Get HTTP response as XML object
 		/// </summary>
-		/// <returns>user agent information</returns>
-		private string GetAgentHeader()
+		/// <param name="s">response stream</param>
+		/// <returns>XML document or null</returns>
+		private XPathDocument Get(Stream s)
+		{
+			try
+			{
+                XPathDocument doc = new XPathDocument(s);
+
+                string code = GetString(doc, "/result/error/code", null);
+
+                if (code != null)
+                {
+                    Set(int.Parse(code), GetString(doc, "/result/error/description", null));
+                    return null;
+                }
+
+				return doc;
+            }
+            catch (Exception e)
+			{
+                Set(Error.CLI_EXCEPTION, e.Message);
+            }
+
+            return null;
+		}
+
+        /// <summary>
+        /// Create user agent header
+        /// </summary>
+        /// <returns>user agent information</returns>
+        private string GetAgentHeader()
 		{
 			return (string.IsNullOrEmpty(Application) ? "" : Application + " ") + "VIESAPIClient/" + VERSION + " .NET/" + Environment.Version;
 		}

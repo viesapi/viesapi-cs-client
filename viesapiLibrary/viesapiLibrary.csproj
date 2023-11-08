@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net20;net452;net462;net472;net48;netstandard2.0;netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
+		<TargetFrameworks>net35;net452;net462;net472;net48;netstandard2.0;netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
 		<RuntimeIdentifiers>win</RuntimeIdentifiers>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 		<PackageId>VIESAPI.VIESAPIClient</PackageId>
-		<Version>1.2.5</Version>
-		<AssemblyVersion>1.2.5.0</AssemblyVersion>
-		<FileVersion>1.2.5.0</FileVersion>
+		<Version>1.2.6</Version>
+		<AssemblyVersion>1.2.6.0</AssemblyVersion>
+		<FileVersion>1.2.6.0</FileVersion>
 
 		<Title>VIES API Service Client</Title>
 		<Summary>VIES API Service Client for .NET Framework (C#)</Summary>
@@ -23,7 +23,7 @@ in the fastest possible way.</Description>
 		<Company>NETCAT</Company>
 		<Product>VIES API</Product>
 		<Authors>NETCAT</Authors>
-		<Copyright>Copyright © 2022 by NETCAT (www.netcat.pl)</Copyright>
+		<Copyright>Copyright © 2022-2023 by NETCAT (www.netcat.pl)</Copyright>
 		<PackageLicenseUrl></PackageLicenseUrl>
 		<PackageProjectUrl>https://viesapi.eu</PackageProjectUrl>
 
@@ -32,11 +32,9 @@ in the fastest possible way.</Description>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>viesapiLibrary.snk</AssemblyOriginatorKeyFile>
 		<DelaySign>false</DelaySign>
-		<PackageLicenseFile></PackageLicenseFile>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net35' ">
 		<Reference Include="System" />
 		<Reference Include="System.Web" />
 		<Reference Include="System.Data" />
