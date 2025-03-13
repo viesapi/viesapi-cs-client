@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright 2022-2023 NETCAT (www.netcat.pl)
+ * Copyright 2022-2025 NETCAT (www.netcat.pl)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  * @author NETCAT <firma@netcat.pl>
- * @copyright 2022-2023 NETCAT (www.netcat.pl)
+ * @copyright 2022-2025 NETCAT (www.netcat.pl)
  * @license http://www.apache.org/licenses/LICENSE-2.0
  */
 
@@ -75,24 +75,30 @@ namespace VIESAPI
 		string TraderAddress { get; set; }
 
         /// <summary>
-        /// Request ID from EU VIES system
+        /// Trader address components
         /// </summary>
         [DispId(8)]
+        AddressComponents TraderAddressComponents { get; set; }
+
+        /// <summary>
+        /// Request ID from EU VIES system
+        /// </summary>
+        [DispId(9)]
         string ID { get; set; }
 
         /// <summary>
         /// Check date time
         /// </summary>
-        [DispId(9)]
+        [DispId(10)]
         DateTime Date { get; set; }
 
         /// <summary>
         /// The source of returned information
         /// </summary>
-        [DispId(10)]
+        [DispId(11)]
         string Source { get; set; }
 
-        [DispId(11)]
+        [DispId(12)]
 		string ToString();
     }
 
@@ -143,10 +149,15 @@ namespace VIESAPI
 		/// </summary>
 		public string TraderAddress { get; set; }
 
+        /// <summary>
+        /// Trader address components
+        /// </summary>
+        public AddressComponents TraderAddressComponents { get; set; }
+        
 		/// <summary>
-		/// Request ID from EU VIES system
-		/// </summary>
-		public string ID { get; set; }
+        /// Request ID from EU VIES system
+        /// </summary>
+        public string ID { get; set; }
 
 		/// <summary>
 		/// Check date time
@@ -184,6 +195,7 @@ namespace VIESAPI
 				+ ", TraderName = " + TraderName
 				+ ", TraderCompanyType = " + TraderCompanyType
 				+ ", TraderAddress = " + TraderAddress
+				+ ", TraderAddressComponents = " + TraderAddressComponents
                 + ", ID = " + ID
                 + ", Date = " + Date
                 + ", Source = " + Source

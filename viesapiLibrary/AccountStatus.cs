@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright 2022-2023 NETCAT (www.netcat.pl)
+ * Copyright 2022-2025 NETCAT (www.netcat.pl)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  * @author NETCAT <firma@netcat.pl>
- * @copyright 2022-2023 NETCAT (www.netcat.pl)
+ * @copyright 2022-2025 NETCAT (www.netcat.pl)
  * @license http://www.apache.org/licenses/LICENSE-2.0
  */
 
@@ -74,79 +74,97 @@ namespace VIESAPI
 		[DispId(7)]
 		decimal ItemPriceStatus { get; set; }
 
+        /// <summary>
+        /// Net price of a single query for an individual plan
+        /// </summary>
+        [DispId(8)]
+        decimal ItemPriceParsed { get; set; }
+        
 		/// <summary>
-		/// Maximum number of queries in the plan
-		/// </summary>
-		[DispId(8)]
+        /// Maximum number of queries in the plan
+        /// </summary>
+        [DispId(9)]
 		int Limit { get; set; }
 
 		/// <summary>
 		/// The minimum time interval between queries
 		/// </summary>
-		[DispId(9)]
+		[DispId(10)]
 		int RequestDelay { get; set; }
 
 		/// <summary>
 		/// Maximum number of domains (API keys)
 		/// </summary>
-		[DispId(10)]
+		[DispId(11)]
 		int DomainLimit { get; set; }
 
 		/// <summary>
 		/// Ability to exceed the maximum number of queries in the plan
 		/// </summary>
-		[DispId(11)]
+		[DispId(12)]
 		bool OverPlanAllowed { get; set; }
 
 		/// <summary>
 		/// Access to MS Excel add-in
 		/// </summary>
-		[DispId(12)]
+		[DispId(13)]
 		bool ExcelAddIn { get; set; }
 
 		/// <summary>
 		/// Access to VIES Checker App application
 		/// </summary>
-		[DispId(13)]
+		[DispId(14)]
 		bool App { get; set; }
 
 		/// <summary>
 		/// Access to VIES Checker CLI/CMD command line application
 		/// </summary>
-		[DispId(14)]
+		[DispId(15)]
 		bool CLI { get; set; }
 
 		/// <summary>
 		/// Access to the statistics of the queries made
 		/// </summary>
-		[DispId(15)]
+		[DispId(16)]
 		bool Stats { get; set; }
 
 		/// <summary>
 		/// Access to monitoring the status of entities
 		/// </summary>
-		[DispId(16)]
+		[DispId(17)]
 		bool Monitor { get; set; }
 
 		/// <summary>
 		/// Access to entity status checking functions in the VIES system
 		/// </summary>
-		[DispId(17)]
+		[DispId(18)]
 		bool FuncGetVIESData { get; set; }
 
+        /// <summary>
+        /// Access to entity status checking functions in the VIES system returning parsed data
+        /// </summary>
+        [DispId(19)]
+        bool FuncGetVIESDataParsed { get; set; }
+        
 		/// <summary>
-		/// Number of queries to the VIES system performed in the current month
-		/// </summary>
-		[DispId(18)]
+        /// Number of queries to the VIES system performed in the current month
+        /// </summary>
+        [DispId(20)]
 		int VIESDataCount { get; set; }
 
+        /// <summary>
+        /// Number of queries to the VIES system returning parsed data performed in the current month
+        /// </summary>
+        [DispId(21)]
+        int VIESDataParsedCount { get; set; }
+        
 		/// <summary>
-		/// Total number of queries performed in the current month
-		/// </summary>
-		[DispId(19)]
+        /// Total number of queries performed in the current month
+        /// </summary>
+        [DispId(22)]
 		int TotalCount { get; set; }
 
-		[DispId(20)]
+		[DispId(23)]
 		string ToString();
 	}
 
@@ -207,10 +225,15 @@ namespace VIESAPI
 		/// </summary>
 		public decimal ItemPriceStatus { get; set; }
 
+        /// <summary>
+        /// Net price of a single query for an individual plan
+        /// </summary>
+        public decimal ItemPriceParsed { get; set; }
+        
 		/// <summary>
-		/// Maximum number of queries in the plan
-		/// </summary>
-		public int Limit { get; set; }
+        /// Maximum number of queries in the plan
+        /// </summary>
+        public int Limit { get; set; }
 
 		/// <summary>
 		/// The minimum time interval between queries
@@ -257,15 +280,25 @@ namespace VIESAPI
 		/// </summary>
 		public bool FuncGetVIESData { get; set; }
 
+        /// <summary>
+        /// Access to entity status checking functions in the VIES system returning parsed data
+        /// </summary>
+        public bool FuncGetVIESDataParsed { get; set; }
+        
 		/// <summary>
-		/// Number of queries to the VIES system performed in the current month
-		/// </summary>
-		public int VIESDataCount { get; set; }
+        /// Number of queries to the VIES system performed in the current month
+        /// </summary>
+        public int VIESDataCount { get; set; }
 
+        /// <summary>
+        /// Number of queries to the VIES system returning parsed data performed in the current month
+        /// </summary>
+        public int VIESDataParsedCount { get; set; }
+        
 		/// <summary>
-		/// Total number of queries performed in the current month
-		/// </summary>
-		public int TotalCount { get; set; }
+        /// Total number of queries performed in the current month
+        /// </summary>
+        public int TotalCount { get; set; }
 
 		/// <summary>
 		/// Create a new object
@@ -284,8 +317,9 @@ namespace VIESAPI
 				+ ", SubscriptionPrice = " + SubscriptionPrice
 				+ ", ItemPrice = " + ItemPrice
 				+ ", ItemPriceStatus = " + ItemPriceStatus
+                + ", ItemPriceParsed = " + ItemPriceParsed
 
-				+ ", Limit = " + Limit
+                + ", Limit = " + Limit
 				+ ", RequestDelay = " + RequestDelay
 				+ ", DomainLimit = " + DomainLimit
 
@@ -297,9 +331,11 @@ namespace VIESAPI
 				+ ", Monitor = " + Monitor
 				
 				+ ", FuncGetVIESData = " + FuncGetVIESData
+                + ", FuncGetVIESDataParsed = " + FuncGetVIESDataParsed
 
-				+ ", VIESDataCount = " + VIESDataCount
-				+ ", TotalCount = " + TotalCount
+                + ", VIESDataCount = " + VIESDataCount
+                + ", VIESDataParsedCount = " + VIESDataParsedCount
+                + ", TotalCount = " + TotalCount
 				+ "]";
         }
     }

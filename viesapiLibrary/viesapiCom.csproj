@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccountStatus.cs" />
+    <Compile Include="AddressComponents.cs" />
     <Compile Include="Error.cs" />
     <Compile Include="EUVAT.cs" />
     <Compile Include="NIP.cs" />

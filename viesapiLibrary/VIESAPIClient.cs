@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright 2022-2023 NETCAT (www.netcat.pl)
+ * Copyright 2022-2025 NETCAT (www.netcat.pl)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  * @author NETCAT <firma@netcat.pl>
- * @copyright 2022-2023 NETCAT (www.netcat.pl)
+ * @copyright 2022-2025 NETCAT (www.netcat.pl)
  * @license http://www.apache.org/licenses/LICENSE-2.0
  */
 
@@ -95,11 +95,19 @@ namespace VIESAPI
 		[DispId(9)]
 		VIESData GetVIESData(string euvat);
 
+        /// <summary>
+        /// Get VIES data for specified number from EU VIES system returning parsed data
+        /// </summary>
+        /// <param name="euvat">EU VAT number with 2-letter country prefix</param>
+        /// <returns>VIES data or null in case of error</returns>
+        [DispId(10)]
+        VIESData GetVIESDataParsed(string euvat);
+        
 		/// <summary>
-		/// Get current account status
-		/// </summary>
-		/// <returns>account status or null in case of error</returns>
-		[DispId(10)]
+        /// Get current account status
+        /// </summary>
+        /// <returns>account status or null in case of error</returns>
+        [DispId(11)]
         AccountStatus GetAccountStatus();
     }
 
@@ -115,7 +123,7 @@ namespace VIESAPI
 	[ComVisible(true)]
 	public class VIESAPIClient : IVIESAPIClient
 	{
-		public const string VERSION = "1.2.6";
+		public const string VERSION = "1.2.7";
 
 		public const string PRODUCTION_URL = "https://viesapi.eu/api";
 		public const string TEST_URL = "https://viesapi.eu/api-test";
@@ -275,11 +283,83 @@ namespace VIESAPI
 			return null;
 		}
 
+        /// <summary>
+        /// Get VIES data for specified number from EU VIES system returning parsed data
+        /// </summary>
+        /// <param name="euvat">EU VAT number with 2-letter country prefix</param>
+        /// <returns>VIES data or null in case of error</returns>
+        public VIESData GetVIESDataParsed(string euvat)
+        {
+            try
+            {
+                // clear error
+                Clear();
+
+                // validate number and construct path
+                string suffix = null;
+
+                if ((suffix = GetPathSuffix(Number.EUVAT, euvat)) == null)
+                {
+                    return null;
+                }
+
+                // prepare url
+                Uri url = new Uri(URL + "/get/vies/parsed/" + suffix);
+
+                // prepare request
+                XPathDocument doc = Get(url);
+
+                if (doc == null)
+                {
+                    return null;
+                }
+
+                // parse response
+                VIESData vies = new VIESData();
+
+                vies.UID = GetString(doc, "/result/vies/uid", null);
+
+                vies.CountryCode = GetString(doc, "/result/vies/countryCode", null);
+                vies.VATNumber = GetString(doc, "/result/vies/vatNumber", null);
+
+                vies.Valid = GetString(doc, "/result/vies/valid", "false").Equals("true");
+
+                vies.TraderName = GetString(doc, "/result/vies/traderName", null);
+                vies.TraderCompanyType = GetString(doc, "/result/vies/traderCompanyType", null);
+                vies.TraderAddress = GetString(doc, "/result/vies/traderAddress", null);
+
+                string country = GetString(doc, "/result/vies/traderAddressComponents/country", null);
+
+				if (country != null && country.Length > 0)
+				{
+					vies.TraderAddressComponents = new AddressComponents();
+                    vies.TraderAddressComponents.Country = country;
+                    vies.TraderAddressComponents.PostalCode = GetString(doc, "/result/vies/traderAddressComponents/postalCode", null);
+                    vies.TraderAddressComponents.City = GetString(doc, "/result/vies/traderAddressComponents/city", null);
+                    vies.TraderAddressComponents.Street = GetString(doc, "/result/vies/traderAddressComponents/street", null);
+                    vies.TraderAddressComponents.StreetNumber = GetString(doc, "/result/vies/traderAddressComponents/streetNumber", null);
+                    vies.TraderAddressComponents.HouseNumber = GetString(doc, "/result/vies/traderAddressComponents/houseNumber", null);
+                }
+
+                vies.ID = GetString(doc, "/result/vies/id", null);
+                vies.Date = GetDateTime(doc, "/result/vies/date");
+                vies.Source = GetString(doc, "/result/vies/source", null);
+
+                return vies;
+            }
+            catch (Exception e)
+            {
+                Set(Error.CLI_EXCEPTION, e.Message);
+            }
+
+            return null;
+        }
+        
 		/// <summary>
-		/// Get current account status
-		/// </summary>
-		/// <returns>account status or null in case of error</returns>
-		public AccountStatus GetAccountStatus()
+        /// Get current account status
+        /// </summary>
+        /// <returns>account status or null in case of error</returns>
+        public AccountStatus GetAccountStatus()
 		{
 			try
 			{
@@ -308,8 +388,9 @@ namespace VIESAPI
 				status.SubscriptionPrice = decimal.Parse(GetString(doc, "/result/account/billingPlan/subscriptionPrice", "0"), CultureInfo.InvariantCulture);
 				status.ItemPrice = decimal.Parse(GetString(doc, "/result/account/billingPlan/itemPrice", "0"), CultureInfo.InvariantCulture);
 				status.ItemPriceStatus = decimal.Parse(GetString(doc, "/result/account/billingPlan/itemPriceCheckStatus", "0"), CultureInfo.InvariantCulture);
+                status.ItemPriceParsed = decimal.Parse(GetString(doc, "/result/account/billingPlan/itemPriceStatusParsed", "0"), CultureInfo.InvariantCulture);
 
-				status.Limit = int.Parse(GetString(doc, "/result/account/billingPlan/limit", "0"));
+                status.Limit = int.Parse(GetString(doc, "/result/account/billingPlan/limit", "0"));
 				status.RequestDelay = int.Parse(GetString(doc, "/result/account/billingPlan/requestDelay", "0"));
 				status.DomainLimit = int.Parse(GetString(doc, "/result/account/billingPlan/domainLimit", "0"));
 				status.OverPlanAllowed = GetString(doc, "/result/account/billingPlan/overplanAllowed", "false").Equals("true");
@@ -320,9 +401,11 @@ namespace VIESAPI
 				status.Monitor = GetString(doc, "/result/account/billingPlan/monitor", "false").Equals("true");
 
 				status.FuncGetVIESData = GetString(doc, "/result/account/billingPlan/funcGetVIESData", "false").Equals("true");
+                status.FuncGetVIESDataParsed = GetString(doc, "/result/account/billingPlan/funcGetVIESDataParsed", "false").Equals("true");
 
-				status.VIESDataCount = int.Parse(GetString(doc, "/result/account/requests/viesData", "0"));
-				status.TotalCount = int.Parse(GetString(doc, "/result/account/requests/total", "0"));
+                status.VIESDataCount = int.Parse(GetString(doc, "/result/account/requests/viesData", "0"));
+                status.VIESDataParsedCount = int.Parse(GetString(doc, "/result/account/requests/viesDataParsed", "0"));
+                status.TotalCount = int.Parse(GetString(doc, "/result/account/requests/total", "0"));
 
 				return status;
 			}
