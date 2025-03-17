@@ -19,6 +19,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -102,12 +103,28 @@ namespace VIESAPI
         /// <returns>VIES data or null in case of error</returns>
         [DispId(10)]
         VIESData GetVIESDataParsed(string euvat);
+
+        /// <summary>
+        /// Upload batch of VAT numbers and get their current VAT statuses and traders data
+        /// </summary>
+        /// <param name="numbers">Array of EU VAT numbers with 2-letter country prefix</param>
+        /// <returns>Batch token for checking status and getting the result</returns>
+        [DispId(11)]
+        string GetVIESDataAsync(string[] numbers);
+
+        /// <summary>
+        /// Check batch result and download data
+        /// </summary>
+        /// <param name="token">Batch token received from GetVIESDataAsync function</param>
+        /// <returns>Batch result</returns>
+        [DispId(12)]
+        BatchResult GetVIESDataAsyncResult(string token);
         
 		/// <summary>
         /// Get current account status
         /// </summary>
         /// <returns>account status or null in case of error</returns>
-        [DispId(11)]
+        [DispId(13)]
         AccountStatus GetAccountStatus();
     }
 
@@ -123,7 +140,7 @@ namespace VIESAPI
 	[ComVisible(true)]
 	public class VIESAPIClient : IVIESAPIClient
 	{
-		public const string VERSION = "1.2.7";
+		public const string VERSION = "1.2.8";
 
 		public const string PRODUCTION_URL = "https://viesapi.eu/api";
 		public const string TEST_URL = "https://viesapi.eu/api-test";
@@ -354,8 +371,178 @@ namespace VIESAPI
 
             return null;
         }
-        
-		/// <summary>
+
+        /// <summary>
+        /// Upload batch of VAT numbers and get their current VAT statuses and traders data
+        /// </summary>
+        /// <param name="numbers">Array of EU VAT numbers with 2-letter country prefix</param>
+        /// <returns>Batch token for checking status and getting the result</returns>
+		[ComVisible(false)]
+        public string GetVIESDataAsync(List<string> numbers)
+		{
+            try
+            {
+                // clear error
+                Clear();
+
+                // validate input
+				if (numbers.Count < 2 || numbers.Count > 99)
+				{
+                    Set(Error.CLI_BATCH_SIZE);
+                    return null;
+                }
+
+				// prepare request
+				string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
+					+ "<request>\r\n"
+					+ "  <batch>\r\n"
+					+ "    <numbers>\r\n";
+
+				foreach (string number in numbers) 
+				{
+					if (!EUVAT.IsValid(number))
+					{
+						Set(Error.CLI_EUVAT);
+						return null;
+					}
+
+					xml += "      <number>" + EUVAT.Normalize(number) + "</number>\r\n";
+				}
+
+				xml += "    </numbers>\r\n"
+					+ "  </batch>\r\n"
+					+ "</request>";
+
+                // prepare url
+                Uri url = new Uri(URL + "/batch/vies");
+
+                // prepare request
+                XPathDocument doc = Post(url, "text/xml", xml);
+
+                if (doc == null)
+                {
+                    return null;
+                }
+
+				// parse response
+				string token = GetString(doc, "/result/batch/token", null);
+
+				if (token == null || token.Length == 0)
+				{
+                    Set(Error.CLI_RESPONSE);
+                    return null;
+				}
+
+                return token;
+            }
+            catch (Exception e)
+            {
+                Set(Error.CLI_EXCEPTION, e.Message);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Upload batch of VAT numbers and get their current VAT statuses and traders data
+        /// </summary>
+        /// <param name="numbers">Array of EU VAT numbers with 2-letter country prefix</param>
+        /// <returns>Batch token for checking status and getting the result</returns>
+        string IVIESAPIClient.GetVIESDataAsync(string[] numbers)
+		{
+			return GetVIESDataAsync(new List<string>(numbers));
+		}
+
+        /// <summary>
+        /// Check batch result and download data
+        /// </summary>
+        /// <param name="token">Batch token received from GetVIESDataAsync function</param>
+        /// <returns>Batch token for checking status and getting the result</returns>
+        public BatchResult GetVIESDataAsyncResult(string token)
+		{
+            try
+            {
+                // clear error
+                Clear();
+
+				// validate input
+                if (token == null || token.Length == 0 || !IsGuid(token))
+                {
+					Set(Error.CLI_INPUT);
+                    return null;
+                }
+
+                // prepare url
+                Uri url = new Uri(URL + "/batch/vies/" + token);
+
+                // prepare request
+                XPathDocument doc = Get(url);
+
+                if (doc == null)
+                {
+                    return null;
+                }
+
+				// parse response
+				BatchResult br = new BatchResult();
+
+                for (int i = 1; ; i++)
+                {
+					string uid = GetString(doc, "/result/batch/numbers/vies[" + i + "]/uid", null);
+
+                    if (uid == null || uid.Length == 0) 
+					{
+						break;
+					}
+
+					VIESData vd = new VIESData();
+
+					vd.UID = uid;
+					vd.CountryCode = GetString(doc, "/result/batch/numbers/vies[" + i + "]/countryCode", null);
+					vd.VATNumber = GetString(doc, "/result/batch/numbers/vies[" + i + "]/vatNumber", null);
+                    vd.Valid = (GetString(doc, "/result/batch/numbers/vies[" + i + "]/valid", "false").Equals("true"));
+					vd.TraderName = GetString(doc, "/result/batch/numbers/vies[" + i + "]/traderName", null);
+					vd.TraderCompanyType = GetString(doc, "/result/batch/numbers/vies[" + i + "]/traderCompanyType", null);
+					vd.TraderAddress = GetString(doc, "/result/batch/numbers/vies[" + i + "]/traderAddress", null);
+					vd.ID = GetString(doc, "/result/batch/numbers/vies[" + i + "]/id", null);
+					vd.Date = GetDateTime(doc, "/result/batch/numbers/vies[" + i + "]/date");
+					vd.Source = GetString(doc, "/result/batch/numbers/vies[" + i + "]/source", null);
+
+					br.Numbers.Add(vd);
+	            }
+
+                for (int i = 1; ; i++)
+                {
+                    string uid = GetString(doc, "/result/batch/errors/error[" + i + "]/uid", null);
+
+                    if (uid == null || uid.Length == 0)
+                    {
+                        break;
+                    }
+
+                    VIESError ve = new VIESError();
+
+                    ve.UID = uid;
+                    ve.CountryCode = GetString(doc, "/result/batch/errors/error[" + i + "]/countryCode", null);
+                    ve.VATNumber = GetString(doc, "/result/batch/errors/error[" + i + "]/vatNumber", null);
+                    ve.Error = GetString(doc, "/result/batch/errors/error[" + i + "]/error", null);
+                    ve.Date = GetDateTime(doc, "/result/batch/errors/error[" + i + "]/date");
+                    ve.Source = GetString(doc, "/result/batch/errors/error[" + i + "]/source", null);
+
+                    br.Errors.Add(ve);
+                }
+                
+				return br;
+            }
+            catch (Exception e)
+            {
+                Set(Error.CLI_EXCEPTION, e.Message);
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Get current account status
         /// </summary>
         /// <returns>account status or null in case of error</returns>
@@ -509,12 +696,89 @@ namespace VIESAPI
 			return doc;
 		}
 
+        /// <summary>
+        /// Perform HTTP POST
+        /// </summary>
+        /// <param name="url">request URL</param>
+		/// <param name="contentType">content type</param>
+		/// <param name="content">content bytes</param>
+        /// <returns>response or null</returns>
+        private XPathDocument Post(Uri url, string contentType, string content)
+        {
+            XPathDocument doc = null;
+
+            try
+            {
+                if (!LegacyProtocolsEnabled)
+                {
+                    // SecurityProtocolType:
+                    // Tls		192
+                    // Tls11	768
+                    // Tls12	3072
+                    // Tls13	12288
+                    try
+                    {
+                        ServicePointManager.SecurityProtocol = (SecurityProtocolType)768 | (SecurityProtocolType)3072 | (SecurityProtocolType)12288;
+                    }
+                    catch (Exception e1)
+                    {
+                        // no tls13
+                        try
+                        {
+                            ServicePointManager.SecurityProtocol = (SecurityProtocolType)768 | (SecurityProtocolType)3072;
+                        }
+                        catch (Exception e2)
+                        {
+                            // no tls12
+                            try
+                            {
+                                ServicePointManager.SecurityProtocol = (SecurityProtocolType)768;
+                            }
+                            catch (Exception e3)
+                            {
+                                // no tls11
+                            }
+                        }
+                    }
+                }
+
+				byte[] req = Encoding.UTF8.GetBytes(content);
+
+                using (WebClient wc = new WebClient())
+                {
+                    wc.Proxy = Proxy;
+
+                    wc.Headers.Set("Accept", "text/xml");
+                    wc.Headers.Set("Authorization", GetAuthHeader("POST", url));
+                    wc.Headers.Set("Content-Type", contentType + "; charset=UTF-8");
+                    wc.Headers.Set("User-Agent", GetAgentHeader());
+
+                    byte[] b = wc.UploadData(url, "POST", req);
+
+                    doc = Get(new MemoryStream(b));
+                }
+            }
+            catch (WebException we)
+            {
+                if (Get(we.Response.GetResponseStream()) != null)
+                {
+                    Set(Error.CLI_EXCEPTION, we.Message);
+                }
+            }
+            catch (Exception e)
+            {
+                Set(Error.CLI_EXCEPTION, e.Message);
+            }
+
+            return doc;
+        }
+        
 		/// <summary>
-		/// Get HTTP response as XML object
-		/// </summary>
-		/// <param name="s">response stream</param>
-		/// <returns>XML document or null</returns>
-		private XPathDocument Get(Stream s)
+        /// Get HTTP response as XML object
+        /// </summary>
+        /// <param name="s">response stream</param>
+        /// <returns>XML document or null</returns>
+        private XPathDocument Get(Stream s)
 		{
 			try
 			{
@@ -687,6 +951,25 @@ namespace VIESAPI
 
             return path;
         }
+
+		/// <summary>
+		/// Check if string is a valid guid
+		/// </summary>
+		/// <param name="guid">string to check</param>
+		/// <returns>true if string is a valid guid</returns>
+		private bool IsGuid(string guid)
+		{
+			try
+			{
+				Guid g = new Guid(guid);
+				return true;
+			}
+			catch (Exception)
+			{
+			}
+
+			return false;
+		}
     }
 
 	#endregion

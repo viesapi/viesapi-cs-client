@@ -19,6 +19,8 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace VIESAPI
 {
@@ -31,18 +33,18 @@ namespace VIESAPI
 		{
 			try
 			{
-				// Create client object and establish connection to the production system
-				// id – API identifier
-				// key – API key (keep it secret)
-				// VIESAPIClient viesapi = new VIESAPIClient("id", "key");
+                // Create client object and establish connection to the production system
+                // id – API identifier
+                // key – API key (keep it secret)
+                // VIESAPIClient viesapi = new VIESAPIClient("id", "key");
 
-				// Create client object and establish connection to the test system
-				VIESAPIClient viesapi = new VIESAPIClient();
+                // Create client object and establish connection to the test system
+                VIESAPIClient viesapi = new VIESAPIClient();
 
-                string nip_eu = "PL7171642051";
+                string eu_vat = "PL7171642051";
 
-				// Get current account status
-				AccountStatus account = viesapi.GetAccountStatus();
+                // Get current account status
+                AccountStatus account = viesapi.GetAccountStatus();
 
 				if (account != null)
 				{
@@ -54,7 +56,7 @@ namespace VIESAPI
 				}
 
 				// Get VIES data from VIES system
-				VIESData vies = viesapi.GetVIESData(nip_eu);
+				VIESData vies = viesapi.GetVIESData(eu_vat);
 
                 if (vies != null)
                 {
@@ -66,7 +68,7 @@ namespace VIESAPI
 				}
 
                 // Get VIES data with parsed trader address from VIES system
-                VIESData vies_parsed = viesapi.GetVIESDataParsed(nip_eu);
+                VIESData vies_parsed = viesapi.GetVIESDataParsed(eu_vat);
 
                 if (vies_parsed != null)
                 {
@@ -76,6 +78,44 @@ namespace VIESAPI
                 {
                     Console.WriteLine("Error: " + viesapi.LastError + " (code: " + viesapi.LastErrorCode + ")");
                 }
+
+                // Upload batch of VAT numbers and get their current VAT statuses and traders data
+                List<string> numbers = new List<string>
+                {
+                    eu_vat,
+                    "DK56314210",
+                    "CZ7710043187"
+                };
+
+                string token = viesapi.GetVIESDataAsync(numbers);
+
+                if (token != null)
+                {
+                    Console.WriteLine("Batch token: " + token);
+                }
+                else
+                {
+                    Console.WriteLine("Error: " + viesapi.LastError + " (code: " + viesapi.LastErrorCode + ")");
+                    return;
+                }
+
+                // Check batch result and download data (at production it usually takes 2-3 min for result to be ready)
+                BatchResult result;
+
+                while ((result = viesapi.GetVIESDataAsyncResult(token)) == null)
+                {
+                    if (viesapi.LastErrorCode != Error.BATCH_PROCESSING)
+                    {
+                        Console.WriteLine("Error: " + viesapi.LastError + " (code: " + viesapi.LastErrorCode + ")");
+                        return;
+                    }
+
+                    Console.WriteLine("Batch is still processing, waiting...");
+                    Thread.Sleep(10000);
+                }
+
+                // Batch result is ready
+                Console.WriteLine(result);
             }
             catch (Exception e)
 			{

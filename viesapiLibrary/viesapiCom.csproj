@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="AccountStatus.cs" />
     <Compile Include="AddressComponents.cs" />
+    <Compile Include="BatchResult.cs" />
     <Compile Include="Error.cs" />
     <Compile Include="EUVAT.cs" />
     <Compile Include="NIP.cs" />
@@ -62,6 +63,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="VIESData.cs" />
+    <Compile Include="VIESError.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
