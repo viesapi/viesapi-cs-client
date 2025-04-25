@@ -62,43 +62,49 @@ namespace VIESAPI
 		[DispId(5)]
 		string TraderName { get; set; }
 
-		/// <summary>
-		/// Trader company type
-		/// </summary>
-		[DispId(6)]
+        /// <summary>
+        /// Trader name components
+        /// </summary>
+        [DispId(6)]
+        NameComponents TraderNameComponents { get; set; }
+
+        /// <summary>
+        /// Trader company type
+        /// </summary>
+        [DispId(7)]
 		string TraderCompanyType { get; set; }
 
 		/// <summary>
 		/// Trader address
 		/// </summary>
-		[DispId(7)]
+		[DispId(8)]
 		string TraderAddress { get; set; }
 
         /// <summary>
         /// Trader address components
         /// </summary>
-        [DispId(8)]
+        [DispId(9)]
         AddressComponents TraderAddressComponents { get; set; }
 
         /// <summary>
         /// Request ID from EU VIES system
         /// </summary>
-        [DispId(9)]
+        [DispId(10)]
         string ID { get; set; }
 
         /// <summary>
         /// Check date time
         /// </summary>
-        [DispId(10)]
+        [DispId(11)]
         DateTime Date { get; set; }
 
         /// <summary>
         /// The source of returned information
         /// </summary>
-        [DispId(11)]
+        [DispId(12)]
         string Source { get; set; }
 
-        [DispId(12)]
+        [DispId(13)]
 		string ToString();
     }
 
@@ -139,10 +145,15 @@ namespace VIESAPI
 		/// </summary>
 		public string TraderName { get; set; }
 
+        /// <summary>
+        /// Trader name components
+        /// </summary>
+        public NameComponents TraderNameComponents { get; set; }
+        
 		/// <summary>
-		/// Trader company type
-		/// </summary>
-		public string TraderCompanyType { get; set; }
+        /// Trader company type
+        /// </summary>
+        public string TraderCompanyType { get; set; }
 
 		/// <summary>
 		/// Trader address
@@ -193,7 +204,8 @@ namespace VIESAPI
 				+ ", VATNumber = " + VATNumber
 				+ ", Valid = " + Valid
 				+ ", TraderName = " + TraderName
-				+ ", TraderCompanyType = " + TraderCompanyType
+                + ", TraderNameComponents = " + TraderNameComponents
+                + ", TraderCompanyType = " + TraderCompanyType
 				+ ", TraderAddress = " + TraderAddress
 				+ ", TraderAddressComponents = " + TraderAddressComponents
                 + ", ID = " + ID

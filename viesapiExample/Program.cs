@@ -67,7 +67,7 @@ namespace VIESAPI
 					Console.WriteLine("Error: " + viesapi.LastError + " (code: " + viesapi.LastErrorCode + ")");
 				}
 
-                // Get VIES data with parsed trader address from VIES system
+                // Get VIES data with parsed trader name and address from VIES system
                 VIESData vies_parsed = viesapi.GetVIESDataParsed(eu_vat);
 
                 if (vies_parsed != null)

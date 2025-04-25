@@ -140,7 +140,7 @@ namespace VIESAPI
 	[ComVisible(true)]
 	public class VIESAPIClient : IVIESAPIClient
 	{
-		public const string VERSION = "1.2.8";
+		public const string VERSION = "1.2.9";
 
 		public const string PRODUCTION_URL = "https://viesapi.eu/api";
 		public const string TEST_URL = "https://viesapi.eu/api-test";
@@ -338,10 +338,20 @@ namespace VIESAPI
 
                 vies.CountryCode = GetString(doc, "/result/vies/countryCode", null);
                 vies.VATNumber = GetString(doc, "/result/vies/vatNumber", null);
-
                 vies.Valid = GetString(doc, "/result/vies/valid", "false").Equals("true");
-
                 vies.TraderName = GetString(doc, "/result/vies/traderName", null);
+
+                string name = GetString(doc, "/result/vies/traderNameComponents/name", null);
+
+                if (name != null && name.Length > 0)
+                {
+                    vies.TraderNameComponents = new NameComponents();
+                    vies.TraderNameComponents.Name = name;
+                    vies.TraderNameComponents.LegalForm = GetString(doc, "/result/vies/traderNameComponents/legalForm", null);
+                    vies.TraderNameComponents.LegalFormCanonicalId = (LegalForm)int.Parse(GetString(doc, "/result/vies/traderNameComponents/legalFormCanonicalId", "0"));
+                    vies.TraderNameComponents.LegalFormCanonicalName = GetString(doc, "/result/vies/traderNameComponents/legalFormCanonicalName", null);
+                }
+
                 vies.TraderCompanyType = GetString(doc, "/result/vies/traderCompanyType", null);
                 vies.TraderAddress = GetString(doc, "/result/vies/traderAddress", null);
 
@@ -457,7 +467,7 @@ namespace VIESAPI
         /// Check batch result and download data
         /// </summary>
         /// <param name="token">Batch token received from GetVIESDataAsync function</param>
-        /// <returns>Batch token for checking status and getting the result</returns>
+        /// <returns>Batch result</returns>
         public BatchResult GetVIESDataAsyncResult(string token)
 		{
             try
