@@ -140,7 +140,7 @@ namespace VIESAPI
 	[ComVisible(true)]
 	public class VIESAPIClient : IVIESAPIClient
 	{
-		public const string VERSION = "1.2.9";
+		public const string VERSION = "1.3.0";
 
 		public const string PRODUCTION_URL = "https://viesapi.eu/api";
 		public const string TEST_URL = "https://viesapi.eu/api-test";
@@ -273,24 +273,7 @@ namespace VIESAPI
 				}
 
 				// parse response
-				VIESData vies = new VIESData();
-
-				vies.UID = GetString(doc, "/result/vies/uid", null);
-
-				vies.CountryCode = GetString(doc, "/result/vies/countryCode", null);
-				vies.VATNumber = GetString(doc, "/result/vies/vatNumber", null);
-
-				vies.Valid = GetString(doc, "/result/vies/valid", "false").Equals("true");
-
-				vies.TraderName = GetString(doc, "/result/vies/traderName", null);
-				vies.TraderCompanyType = GetString(doc, "/result/vies/traderCompanyType", null);
-				vies.TraderAddress = GetString(doc, "/result/vies/traderAddress", null);
-
-				vies.ID = GetString(doc, "/result/vies/id", null);
-				vies.Date = GetDateTime(doc, "/result/vies/date");
-				vies.Source = GetString(doc, "/result/vies/source", null);
-
-				return vies;
+				return Parse(doc, "/result/vies");
 			}
 			catch (Exception e)
 			{
@@ -332,47 +315,7 @@ namespace VIESAPI
                 }
 
                 // parse response
-                VIESData vies = new VIESData();
-
-                vies.UID = GetString(doc, "/result/vies/uid", null);
-
-                vies.CountryCode = GetString(doc, "/result/vies/countryCode", null);
-                vies.VATNumber = GetString(doc, "/result/vies/vatNumber", null);
-                vies.Valid = GetString(doc, "/result/vies/valid", "false").Equals("true");
-                vies.TraderName = GetString(doc, "/result/vies/traderName", null);
-
-                string name = GetString(doc, "/result/vies/traderNameComponents/name", null);
-
-                if (name != null && name.Length > 0)
-                {
-                    vies.TraderNameComponents = new NameComponents();
-                    vies.TraderNameComponents.Name = name;
-                    vies.TraderNameComponents.LegalForm = GetString(doc, "/result/vies/traderNameComponents/legalForm", null);
-                    vies.TraderNameComponents.LegalFormCanonicalId = (LegalForm)int.Parse(GetString(doc, "/result/vies/traderNameComponents/legalFormCanonicalId", "0"));
-                    vies.TraderNameComponents.LegalFormCanonicalName = GetString(doc, "/result/vies/traderNameComponents/legalFormCanonicalName", null);
-                }
-
-                vies.TraderCompanyType = GetString(doc, "/result/vies/traderCompanyType", null);
-                vies.TraderAddress = GetString(doc, "/result/vies/traderAddress", null);
-
-                string country = GetString(doc, "/result/vies/traderAddressComponents/country", null);
-
-				if (country != null && country.Length > 0)
-				{
-					vies.TraderAddressComponents = new AddressComponents();
-                    vies.TraderAddressComponents.Country = country;
-                    vies.TraderAddressComponents.PostalCode = GetString(doc, "/result/vies/traderAddressComponents/postalCode", null);
-                    vies.TraderAddressComponents.City = GetString(doc, "/result/vies/traderAddressComponents/city", null);
-                    vies.TraderAddressComponents.Street = GetString(doc, "/result/vies/traderAddressComponents/street", null);
-                    vies.TraderAddressComponents.StreetNumber = GetString(doc, "/result/vies/traderAddressComponents/streetNumber", null);
-                    vies.TraderAddressComponents.HouseNumber = GetString(doc, "/result/vies/traderAddressComponents/houseNumber", null);
-                }
-
-                vies.ID = GetString(doc, "/result/vies/id", null);
-                vies.Date = GetDateTime(doc, "/result/vies/date");
-                vies.Source = GetString(doc, "/result/vies/source", null);
-
-                return vies;
+                return Parse(doc, "/result/vies");
             }
             catch (Exception e)
             {
@@ -396,7 +339,7 @@ namespace VIESAPI
                 Clear();
 
                 // validate input
-				if (numbers.Count < 2 || numbers.Count > 99)
+				if (numbers.Count < 3 || numbers.Count > 99)
 				{
                     Set(Error.CLI_BATCH_SIZE);
                     return null;
@@ -496,6 +439,8 @@ namespace VIESAPI
 				// parse response
 				BatchResult br = new BatchResult();
 
+                br.UID = GetString(doc, "/result/batch/uid", null);
+
                 for (int i = 1; ; i++)
                 {
 					string uid = GetString(doc, "/result/batch/numbers/vies[" + i + "]/uid", null);
@@ -505,21 +450,8 @@ namespace VIESAPI
 						break;
 					}
 
-					VIESData vd = new VIESData();
-
-					vd.UID = uid;
-					vd.CountryCode = GetString(doc, "/result/batch/numbers/vies[" + i + "]/countryCode", null);
-					vd.VATNumber = GetString(doc, "/result/batch/numbers/vies[" + i + "]/vatNumber", null);
-                    vd.Valid = (GetString(doc, "/result/batch/numbers/vies[" + i + "]/valid", "false").Equals("true"));
-					vd.TraderName = GetString(doc, "/result/batch/numbers/vies[" + i + "]/traderName", null);
-					vd.TraderCompanyType = GetString(doc, "/result/batch/numbers/vies[" + i + "]/traderCompanyType", null);
-					vd.TraderAddress = GetString(doc, "/result/batch/numbers/vies[" + i + "]/traderAddress", null);
-					vd.ID = GetString(doc, "/result/batch/numbers/vies[" + i + "]/id", null);
-					vd.Date = GetDateTime(doc, "/result/batch/numbers/vies[" + i + "]/date");
-					vd.Source = GetString(doc, "/result/batch/numbers/vies[" + i + "]/source", null);
-
-					br.Numbers.Add(vd);
-	            }
+					br.Numbers.Add(Parse(doc, "/result/batch/numbers/vies[" + i + "]"));
+                }
 
                 for (int i = 1; ; i++)
                 {
@@ -614,10 +546,117 @@ namespace VIESAPI
 			return null;
 		}
 
-		/// <summary>
-		/// Clear last error
-		/// </summary>
-		private void Clear()
+        /// <summary>
+        /// Get current EU VIES system status
+        /// </summary>
+        /// <returns>VIES status or null in case of error</returns>
+        public VIESStatus GetVIESStatus()
+        {
+            try
+            {
+                // clear error
+                Clear();
+
+                // prepare url
+                Uri url = new Uri(URL + "/check/vies/status");
+
+                // prepare request
+                XPathDocument doc = Get(url);
+
+                if (doc == null)
+                {
+                    return null;
+                }
+
+                // parse response
+                VIESStatus status = new VIESStatus();
+
+                status.UID = GetString(doc, "/result/vies/uid", null);
+                status.Available = GetString(doc, "/result/vies/available", "false").Equals("true");
+
+                for (int i = 1; ; i++)
+                {
+                    string code = GetString(doc, "/result/vies/countries/country[" + i + "]/countryCode", null);
+
+                    if (code == null || code.Length == 0)
+                    {
+                        break;
+                    }
+
+                    CountryStatus cs = new CountryStatus();
+
+					cs.CountryCode = code;
+                    cs.Status = GetString(doc, "/result/vies/countries/country[" + i + "]/status", null);
+
+                    status.Countries.Add(cs);
+                }
+
+                return status;
+            }
+            catch (Exception e)
+            {
+                Set(Error.CLI_EXCEPTION, e.Message);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Parse VIES data from the document
+        /// </summary>
+        /// <param name="doc">document object</param>
+        /// <param name="prefix">XPath prefix</param>
+        /// <returns>data object</returns>
+        private VIESData Parse(XPathDocument doc, string prefix)
+		{
+            VIESData vies = new VIESData();
+
+            vies.UID = GetString(doc, prefix + "/uid", null);
+
+            vies.CountryCode = GetString(doc, prefix + "/countryCode", null);
+            vies.VATNumber = GetString(doc, prefix + "/vatNumber", null);
+            vies.Valid = GetString(doc, prefix + "/valid", "false").Equals("true");
+            vies.TraderName = GetString(doc, prefix + "/traderName", null);
+
+            string name = GetString(doc, prefix + "/traderNameComponents/name", null);
+
+            if (name != null && name.Length > 0)
+            {
+                vies.TraderNameComponents = new NameComponents();
+                vies.TraderNameComponents.Name = name;
+                vies.TraderNameComponents.LegalForm = GetString(doc, prefix + "/traderNameComponents/legalForm", null);
+                vies.TraderNameComponents.LegalFormCanonicalId = (LegalForm)int.Parse(GetString(doc, prefix + "/traderNameComponents/legalFormCanonicalId", "0"));
+                vies.TraderNameComponents.LegalFormCanonicalName = GetString(doc, prefix + "/traderNameComponents/legalFormCanonicalName", null);
+            }
+
+            vies.TraderCompanyType = GetString(doc, prefix + "/traderCompanyType", null);
+            vies.TraderAddress = GetString(doc, prefix + "/traderAddress", null);
+
+            string country = GetString(doc, prefix + "/traderAddressComponents/country", null);
+
+            if (country != null && country.Length > 0)
+            {
+                vies.TraderAddressComponents = new AddressComponents();
+                vies.TraderAddressComponents.Country = country;
+                vies.TraderAddressComponents.PostalCode = GetString(doc, prefix + "/traderAddressComponents/postalCode", null);
+                vies.TraderAddressComponents.City = GetString(doc, prefix + "/traderAddressComponents/city", null);
+                vies.TraderAddressComponents.Street = GetString(doc, prefix + "/traderAddressComponents/street", null);
+                vies.TraderAddressComponents.StreetNumber = GetString(doc, prefix + "/traderAddressComponents/streetNumber", null);
+                vies.TraderAddressComponents.HouseNumber = GetString(doc, prefix + "/traderAddressComponents/houseNumber", null);
+                vies.TraderAddressComponents.Other = GetString(doc, prefix + "/traderAddressComponents/other", null);
+            }
+
+            vies.ID = GetString(doc, prefix + "/id", null);
+            vies.Date = GetDateTime(doc, prefix + "/date");
+            vies.Source = GetString(doc, prefix + "/source", null);
+
+            return vies;
+        }
+
+        /// <summary>
+        /// Clear last error
+        /// </summary>
+        private void Clear()
 		{
 			LastErrorCode = 0;
 			LastError = string.Empty;

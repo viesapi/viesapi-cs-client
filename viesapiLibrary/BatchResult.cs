@@ -33,19 +33,25 @@ namespace VIESAPI
 	[ComVisible(true)]
 	public interface IBatchResult
     {
-		/// <summary>
-		/// Valid VIES results
-		/// </summary>
-		[DispId(1)]
+        /// <summary>
+        /// Unique response ID
+        /// </summary>
+        [DispId(1)]
+        string UID { get; set; }
+        
+        /// <summary>
+        /// Valid VIES results
+        /// </summary>
+        [DispId(2)]
 		VIESData[] Numbers { get; set; }
 
 		/// <summary>
 		/// Failed VIES results
 		/// </summary>
-		[DispId(2)]
+		[DispId(3)]
 		VIESError[] Errors { get; set; }
 
-        [DispId(3)]
+        [DispId(4)]
 		string ToString();
     }
 
@@ -61,6 +67,11 @@ namespace VIESAPI
 	[ComVisible(true)]
 	public class BatchResult : IBatchResult
 	{
+        /// <summary>
+        /// Unique response ID
+        /// </summary>
+        public string UID { get; set; }
+
         /// <summary>
         /// Valid VIES results
         /// </summary>
@@ -102,7 +113,8 @@ namespace VIESAPI
 
         public override string ToString()
 		{
-			return "BatchResult: [Numbers = [" + string.Join(", ", Numbers.ConvertAll(e => Convert.ToString(e)).ToArray()) + "]"
+			return "BatchResult: [UID = " + UID
+                + ", Numbers = [" + string.Join(", ", Numbers.ConvertAll(e => Convert.ToString(e)).ToArray()) + "]"
                 + ", Errors = [" + string.Join(", ", Errors.ConvertAll(e => Convert.ToString(e)).ToArray()) + "]"
                 + "]";
 		}

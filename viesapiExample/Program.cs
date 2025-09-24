@@ -43,6 +43,18 @@ namespace VIESAPI
 
                 string eu_vat = "PL7171642051";
 
+                // Get current EU VIES system status
+                VIESStatus viesStatus = viesapi.GetVIESStatus();
+
+                if (viesStatus != null)
+                {
+                    Console.WriteLine(viesStatus);
+                }
+                else
+                {
+                    Console.WriteLine("Error: " + viesapi.LastError + " (code: " + viesapi.LastErrorCode + ")");
+                }
+
                 // Get current account status
                 AccountStatus account = viesapi.GetAccountStatus();
 
@@ -68,11 +80,11 @@ namespace VIESAPI
 				}
 
                 // Get VIES data with parsed trader name and address from VIES system
-                VIESData vies_parsed = viesapi.GetVIESDataParsed(eu_vat);
+                VIESData viesParsed = viesapi.GetVIESDataParsed(eu_vat);
 
-                if (vies_parsed != null)
+                if (viesParsed != null)
                 {
-                    Console.WriteLine(vies_parsed);
+                    Console.WriteLine(viesParsed);
                 }
                 else
                 {

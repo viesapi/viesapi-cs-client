@@ -68,7 +68,13 @@ namespace VIESAPI
         [DispId(6)]
         string HouseNumber { get; set; }
 
+        /// <summary>
+        /// Other address details (area name, building name, floor number, etc.)
+        /// </summary>
         [DispId(7)]
+        string Other { get; set; }
+
+        [DispId(8)]
         string ToString();
     }
 
@@ -115,6 +121,11 @@ namespace VIESAPI
         public string HouseNumber { get; set; }
 
         /// <summary>
+        /// Other address details (area name, building name, floor number, etc.)
+        /// </summary>
+        public string Other { get; set; }
+
+        /// <summary>
         /// Create new object
         /// </summary>
         public AddressComponents()
@@ -129,6 +140,7 @@ namespace VIESAPI
                 + ", Street = " + Street
                 + ", StreetNumber = " + StreetNumber
                 + ", HouseNumber = " + HouseNumber
+                + ", Other = " + Other
                 + "]";
         }
     }

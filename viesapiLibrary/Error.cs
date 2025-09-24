@@ -102,7 +102,7 @@ namespace VIESAPI
             { CLI_EXCEPTION,   "Function generated an exception" },
             { CLI_DATEFORMAT,  "Date has an invalid format" },
 			{ CLI_INPUT,       "Invalid input parameter" },
-            { CLI_BATCH_SIZE,  "Batch size limit exceeded [2-99]" }
+            { CLI_BATCH_SIZE,  "Batch size limit exceeded [3-99]" }
         };
 
         /// <summary>
