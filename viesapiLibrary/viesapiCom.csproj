@@ -93,4 +93,25 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<TargetsForTfmSpecificBuildOutput>SignAssemblies;$(TargetsForTfmSpecificBuildOutput)</TargetsForTfmSpecificBuildOutput>
+		<ProgramFilesX86>$([System.Environment]::GetEnvironmentVariable('ProgramFiles(x86)'))</ProgramFilesX86>
+	</PropertyGroup>
+	
+	<Target Name="SignAssemblies" AfterTargets="Build" Condition=" '$(Configuration)' == 'Release' ">
+		<ItemGroup>
+			<PossibleSignTools Include="$(ProgramFilesX86)\Windows Kits\10\bin\*\x86\signtool.exe" />
+			<ToSign Include="$(TargetPath)" />
+		</ItemGroup>
+		
+		<PropertyGroup>
+			<SigntoolPath Condition=" '$(SigntoolPath)' == '' ">%(PossibleSignTools.FullPath)</SigntoolPath>
+		</PropertyGroup>
+		
+		<Message Text="Signing using: $(SigntoolPath)" Importance="High" />
+		
+		<Exec Command="&quot;$(SigntoolPath)&quot; sign /fd SHA256 /n NETCAT /td SHA256 /tr &quot;http://public-qlts.certum.pl/qts-17&quot; @(ToSign->'&quot;%(FullPath)&quot;',' ')"
+			StandardOutputImportance="High"
+			StandardErrorImportance="High" />
+	</Target>
 </Project>
