@@ -110,7 +110,7 @@
 		
 		<Message Text="Signing using: $(SigntoolPath)" Importance="High" />
 		
-		<Exec Command="&quot;$(SigntoolPath)&quot; sign /fd SHA256 /n NETCAT /td SHA256 /tr &quot;http://public-qlts.certum.pl/qts-17&quot; @(ToSign->'&quot;%(FullPath)&quot;',' ')"
+		<Exec Command="&quot;$(SigntoolPath)&quot; sign /fd SHA256 /n NETCAT /td SHA256 /tr &quot;http://time.certum.pl&quot; @(ToSign->'&quot;%(FullPath)&quot;',' ')"
 			StandardOutputImportance="High"
 			StandardErrorImportance="High" />
 	</Target>

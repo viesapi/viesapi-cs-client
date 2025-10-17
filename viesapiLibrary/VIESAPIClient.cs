@@ -140,7 +140,7 @@ namespace VIESAPI
 	[ComVisible(true)]
 	public class VIESAPIClient : IVIESAPIClient
 	{
-		public const string VERSION = "1.3.1";
+		public const string VERSION = "1.3.2";
 
 		public const string PRODUCTION_URL = "https://viesapi.eu/api";
 		public const string TEST_URL = "https://viesapi.eu/api-test";
